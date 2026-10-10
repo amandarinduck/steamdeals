@@ -7,9 +7,8 @@
 `conda create -n steamdeals python=3.12`
 
 3. install requirements
-activate conda env using `conda activate`and install requirements
 
-`pip install -r requirements.txt`
+activate conda env using `conda activate`and install requirements using `pip install -r requirements.txt`
 
 
 -This script uses Selenium to automate the browser with Firefox, for use with different browsers check out the Selenium docs at: https://www.selenium.dev/documentation/
