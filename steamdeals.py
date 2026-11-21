@@ -39,44 +39,32 @@ def scrape():
             previousheight = newheight 
     except KeyboardInterrupt:
             print("killing script")
+    finally: 
+        final_html = driver.page_source #all the html from scrolling via Selenium, then parsed via BeautifulSoup
+        driver.quit()
 
-    final_html = driver.page_source #all the html from scrolling via Selenium, then parsed via BeautifulSoup
     soup = BeautifulSoup(final_html, "html.parser")
     return soup
 
 def parse():
 
-    targets = soup.find_all('span',class_='title')
-    discounts = soup.find_all('div',class_='discount_pct')
-    finalprice = soup.find_all('div',class_= 'discount_final_price')
-    ogprice = soup.find_all('div',class_= 'discount_original_price')
-
-    name = []
-    deals = []
-    discountprice = []
-    originalprice = []
-
+    targets = soup.find_all('a', class_="search_result_row")
+    steamdeals = []
     for target in targets:
-        name.append(target.text)
-    for discount in discounts:
-        deals.append(discount.text)
-    for prices in finalprice:
-        discountprice.append(prices.text)
-    for prices in ogprice:
-        originalprice.append(prices.text)
-    #pass wanted info to 4 separate arrays
+        name = target.find('span',class_='title')
+        discount = target.find('div',class_='discount_pct')
+        finalprice = target.find('div',class_= 'discount_final_price')
+        ogprice = target.find('div',class_= 'discount_original_price')
+        data = {
+            'Name':name.text if name else None,
+            'Original Price':ogprice.text if ogprice else None,
+            'Discount Price':finalprice.text if finalprice else None,
+            'Deal':discount.text if discount else None 
+        }
+        steamdeals.append(data)
 
-    data = {
-        'Name':name,
-        'Original Price':originalprice,
-        'Discount Price':discountprice,
-        'Deal':deals
-    }
 
-    #some data tiles dont have certain elements, so to load unequal arrays, so the dataframe is first loaded as rows, then transposed. pandas autofills uncaught elements as none 
-
-    df = pd.DataFrame.from_dict(data, orient='index')
-    df = df.transpose()
+    df = pd.DataFrame(steamdeals)
     df.to_csv('results.csv', index = False)
     print(f"scraped deals from {len(df)} games, succesfully exported to results.csv")
 
